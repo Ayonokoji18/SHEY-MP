@@ -6,7 +6,8 @@ import jwt from "jsonwebtoken";
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
-  const { name, email, password } = req.body;
+  console.log(req.body);
+  const { name, email, password, cpassword } = req.body;
 
   // check user exist or not
   try {
@@ -16,6 +17,12 @@ router.post("/register", async (req, res) => {
     }
 
     //hashed password
+    if (password !== cpassword) {
+      return res.status(400).send({
+        status: false,
+        message: "Password didnt match",
+      });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedpassword = await bcrypt.hash(password, salt);

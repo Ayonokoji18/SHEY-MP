@@ -52,6 +52,9 @@ function Register() {
           <Form.Item label="Password" name="password" rules={rules}>
             <Input type="password" placeholder="password" />
           </Form.Item>
+          <Form.Item label="Confirm Password" name="cpassword" rules={rules}>
+            <Input type="password" placeholder="confirm password" />
+          </Form.Item>
           <Button type="primary" htmlType="submit" block className="mt-2">
             Register
           </Button>
