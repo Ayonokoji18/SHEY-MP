@@ -1,7 +1,8 @@
 import React from "react";
-import { Form, Input, Button } from "antd";
-import { Link } from "react-router-dom";
+import { Form, Input, Button, message } from "antd";
+import { Link, useNavigate } from "react-router-dom";
 import Divider from "../../components/Divider";
+import { RegisterUser } from "../../apicalls/users";
 
 const rules = [
   {
@@ -11,12 +12,31 @@ const rules = [
 ];
 
 function Register() {
-  const onFinish = (values) => {
-    console.log(values);
+  const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
+  const onFinish = async (values) => {
+    console.log("Form values", values);
+    try {
+      const response = await RegisterUser(values);
+      console.log("Register API response:", response);
+      if (response.success) {
+        console.log("ABout to Show Success Message");
+        messageApi.success(response.message);
+        message.success(response.message);
+        setTimeout(() => {
+          navigate("/login");
+        }, 1000);
+      } else {
+        throw new Error(response.message);
+      }
+    } catch (error) {
+      messageApi.error(error.message);
+    }
   };
 
   return (
     <div className="h-screen bg-primary flex justify-center items-center">
+      {contextHolder}
       <div className="bg-white p-3 rounded w-[450px]">
         <h1 className="text-primary text-2xl">
           SMP - <span className="text-gray-400">REGISTER</span>
@@ -26,7 +46,7 @@ function Register() {
           <Form.Item label="Name" name="name" rules={rules}>
             <Input placeholder="Name" />
           </Form.Item>
-          <Form.Item label="Email" name="Email" rules={rules}>
+          <Form.Item label="Email" name="email" rules={rules}>
             <Input placeholder="Email" />
           </Form.Item>
           <Form.Item label="Password" name="password" rules={rules}>

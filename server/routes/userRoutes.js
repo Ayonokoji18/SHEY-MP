@@ -1,6 +1,8 @@
 import User from "../models/userModels.js";
 import express from "express";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
@@ -28,12 +30,18 @@ router.post("/register", async (req, res) => {
 
     await newUser.save();
 
-    res.status(200).send({ message: "User Registered Successfully" });
+    res.status(200).send({
+      success: true,
+      message: "User Registered Successfully",
+    });
 
     // error handling
   } catch (err) {
     console.log(err);
-    res.status(500).send({ message: "some error occurred" });
+    res.status(500).send({
+      success: false,
+      message: "some error occurred",
+    });
   }
 });
 
@@ -45,19 +53,38 @@ router.post("/login", async (req, res) => {
   try {
     const oldUser = await User.findOne({ email });
     if (!oldUser) {
-      return res.status(400).send({ message: "User Doesnt Exist" });
+      return res.status(400).send({
+        success: false,
+        message: "User Doesnt Exist",
+      });
     }
 
     // checking password of that user
     const isMatch = await bcrypt.compare(password, oldUser.password);
     if (!isMatch) {
-      return res.status(400).send({ message: "InCorrect Passsword" });
+      return res.status(400).send({
+        success: false,
+        message: "InCorrect Passsword",
+      });
     }
 
-    res.status(200).send({ message: "User Login successfully" });
+    //sending jsonwebtoken
+
+    const token = jwt.sign({ userid: oldUser._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+    res.status(200).send({
+      message: "User Login successfully",
+      success: true,
+      data: token,
+    });
   } catch (err) {
     console.log(err);
-    res.status(500).send({ message: "Error in Login" });
+    res.status(500).send({
+      success: false,
+      message: "Error in Login",
+    });
   }
 });
 
